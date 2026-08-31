@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import Category, Product
-import cloudinary.utils
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -30,12 +29,7 @@ class ProductSerializer(serializers.ModelSerializer):
         if not obj.image:
             return None
 
-        url, options = cloudinary.utils.cloudinary_url(
-            obj.image.name,
-            secure=True
-        )
-
-        return url
+        return obj.image.url
 
     class Meta:
         model = Product
