@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
+from cloudinary.models import CloudinaryField
 
 
 class Category(models.Model):
@@ -20,13 +21,25 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    category = models.ForeignKey(Category, related_name="products", on_delete=models.CASCADE)
+    category = models.ForeignKey(
+        Category,
+        related_name="products",
+        on_delete=models.CASCADE
+    )
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=220, unique=True, blank=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    compare_at_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    image = models.ImageField(upload_to="products/")
+    compare_at_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    # Cloudinary par product image store hogi
+    image = CloudinaryField("image", folder="products")
+
     is_active = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
     stock = models.PositiveIntegerField(default=100)
@@ -40,16 +53,23 @@ class Product(models.Model):
             base = slugify(self.name)
             slug = base
             n = 1
-            while Product.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+
+            while Product.objects.filter(
+                slug=slug
+            ).exclude(pk=self.pk).exists():
                 n += 1
                 slug = f"{base}-{n}"
+
             self.slug = slug
+
         super().save(*args, **kwargs)
 
     @property
     def discount_percent(self):
         if self.compare_at_price and self.compare_at_price > self.price:
-            return round((1 - (self.price / self.compare_at_price)) * 100)
+            return round(
+                (1 - (self.price / self.compare_at_price)) * 100
+            )
         return 0
 
     def __str__(self):
