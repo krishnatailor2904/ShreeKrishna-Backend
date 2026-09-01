@@ -33,10 +33,11 @@ SECRET_KEY = os.getenv(
 
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
+
 ALLOWED_HOSTS = [
-    "shree-krishna-backend.vercel.app",
-    "shree-krishna-backend-ddc73fb9c-shree-krishna-tailor.vercel.app",
-    "shree-krishna-backend-ny92edlzn-shree-krishna-tailor.vercel.app",
+    ".vercel.app",
+    "shreekrishnaa.com",
+    "www.shreekrishnaa.com",
     "localhost",
     "127.0.0.1",
 ]
@@ -47,6 +48,7 @@ ALLOWED_HOSTS = [
 # =========================================================
 
 INSTALLED_APPS = [
+    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -54,13 +56,16 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    # Third party
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
 
+    # Cloudinary
     "cloudinary",
     "cloudinary_storage",
 
+    # Project apps
     "accounts",
     "products",
     "orders",
@@ -73,27 +78,44 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+
     "corsheaders.middleware.CorsMiddleware",
+
     "django.contrib.sessions.middleware.SessionMiddleware",
+
     "django.middleware.common.CommonMiddleware",
+
     "django.middleware.csrf.CsrfViewMiddleware",
+
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+
     "django.contrib.messages.middleware.MessageMiddleware",
+
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 
 # =========================================================
-# URL / TEMPLATES
+# URL CONFIG
 # =========================================================
 
 ROOT_URLCONF = "config.urls"
 
+
+# =========================================================
+# TEMPLATES
+# =========================================================
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+
+        "DIRS": [
+            BASE_DIR / "templates"
+        ],
+
         "APP_DIRS": True,
+
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
@@ -111,6 +133,7 @@ TEMPLATES = [
 # =========================================================
 
 WSGI_APPLICATION = "config.wsgi.application"
+
 ASGI_APPLICATION = "config.asgi.application"
 
 
@@ -125,6 +148,7 @@ if not DATABASE_URL:
         f"DATABASE_URL not found. Checked: {ENV_FILE}"
     )
 
+
 DATABASES = {
     "default": dj_database_url.parse(
         DATABASE_URL,
@@ -132,6 +156,11 @@ DATABASES = {
         ssl_require=True,
     )
 }
+
+
+# =========================================================
+# CUSTOM USER MODEL
+# =========================================================
 
 AUTH_USER_MODEL = "accounts.User"
 
@@ -145,15 +174,20 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME":
         "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
+
     {
         "NAME":
         "django.contrib.auth.password_validation.MinimumLengthValidator",
-        "OPTIONS": {"min_length": 6},
+        "OPTIONS": {
+            "min_length": 6
+        },
     },
+
     {
         "NAME":
         "django.contrib.auth.password_validation.CommonPasswordValidator"
     },
+
     {
         "NAME":
         "django.contrib.auth.password_validation.NumericPasswordValidator"
@@ -170,6 +204,7 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
 
 USE_I18N = True
+
 USE_TZ = True
 
 
@@ -178,28 +213,51 @@ USE_TZ = True
 # =========================================================
 
 STATIC_URL = "/static/"
+
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 # =========================================================
-# MEDIA / CLOUDINARY
+# MEDIA FILES
 # =========================================================
 
 MEDIA_URL = "/media/"
+
 MEDIA_ROOT = BASE_DIR / "media"
 
+
+# =========================================================
+# CLOUDINARY
+# =========================================================
+
 CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": os.getenv("CLOUDINARY_CLOUD_NAME"),
-    "API_KEY": os.getenv("CLOUDINARY_API_KEY"),
-    "API_SECRET": os.getenv("CLOUDINARY_API_SECRET"),
+    "CLOUD_NAME": os.getenv(
+        "CLOUDINARY_CLOUD_NAME"
+    ),
+
+    "API_KEY": os.getenv(
+        "CLOUDINARY_API_KEY"
+    ),
+
+    "API_SECRET": os.getenv(
+        "CLOUDINARY_API_SECRET"
+    ),
 }
+
+
+# =========================================================
+# DJANGO STORAGE
+# =========================================================
 
 STORAGES = {
     "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        "BACKEND":
+        "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
+
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "BACKEND":
+        "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
 
@@ -212,13 +270,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # =========================================================
-# REST FRAMEWORK
+# DJANGO REST FRAMEWORK
 # =========================================================
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.AllowAny",
     ),
@@ -231,8 +290,12 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
+
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
-    "AUTH_HEADER_TYPES": ("Bearer",),
+
+    "AUTH_HEADER_TYPES": (
+        "Bearer",
+    ),
 }
 
 
@@ -241,22 +304,34 @@ SIMPLE_JWT = {
 # =========================================================
 
 CORS_ALLOWED_ORIGINS = [
-    origin.strip()
-    for origin in os.getenv(
-        "CORS_ALLOWED_ORIGINS",
-        "http://localhost:5173,http://127.0.0.1:5173"
-    ).split(",")
-    if origin.strip()
+    "https://shreekrishnaa.com",
+    "https://www.shreekrishnaa.com",
+
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
+
 CORS_ALLOW_CREDENTIALS = True
+
+
+# =========================================================
+# CSRF TRUSTED ORIGINS
+# =========================================================
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://shreekrishnaa.com",
+    "https://www.shreekrishnaa.com",
+]
 
 
 # =========================================================
 # EMAIL
 # =========================================================
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = (
+    "django.core.mail.backends.smtp.EmailBackend"
+)
 
 EMAIL_HOST = os.getenv(
     "EMAIL_HOST",
