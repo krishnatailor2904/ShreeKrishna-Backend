@@ -1,22 +1,51 @@
 """
 Django settings for Shree Krishnaa e-commerce project.
 """
+
 import os
 from pathlib import Path
 from datetime import timedelta
+
 from dotenv import load_dotenv
 import dj_database_url
 import cloudinary
 import cloudinary_storage
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-change-this-in-production-shreekrishnaa")
+# =========================================================
+# BASE CONFIG
+# =========================================================
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+ENV_FILE = BASE_DIR / ".env"
+load_dotenv(dotenv_path=ENV_FILE, override=True)
+
+
+# =========================================================
+# SECURITY
+# =========================================================
+
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-change-this-in-production-shreekrishnaa"
+)
 
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv(
+        "ALLOWED_HOSTS",
+        "localhost,127.0.0.1"
+    ).split(",")
+    if host.strip()
+]
+
+
+# =========================================================
+# INSTALLED APPS
+# =========================================================
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -29,13 +58,19 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
+
     "cloudinary",
-"cloudinary_storage",
+    "cloudinary_storage",
 
     "accounts",
     "products",
     "orders",
 ]
+
+
+# =========================================================
+# MIDDLEWARE
+# =========================================================
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -47,6 +82,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+
+# =========================================================
+# URL / TEMPLATES
+# =========================================================
 
 ROOT_URLCONF = "config.urls"
 
@@ -66,32 +106,85 @@ TEMPLATES = [
     },
 ]
 
+
+# =========================================================
+# WSGI / ASGI
+# =========================================================
+
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
+
+# =========================================================
+# DATABASE
+# =========================================================
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise RuntimeError(
+        f"DATABASE_URL not found. Checked: {ENV_FILE}"
+    )
+
 DATABASES = {
     "default": dj_database_url.parse(
-        os.getenv("DATABASE_URL"),
+        DATABASE_URL,
         conn_max_age=600,
         ssl_require=True,
     )
 }
+
 AUTH_USER_MODEL = "accounts.User"
 
+
+# =========================================================
+# PASSWORD VALIDATION
+# =========================================================
+
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 6}},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {
+        "NAME":
+        "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
+    {
+        "NAME":
+        "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 6},
+    },
+    {
+        "NAME":
+        "django.contrib.auth.password_validation.CommonPasswordValidator"
+    },
+    {
+        "NAME":
+        "django.contrib.auth.password_validation.NumericPasswordValidator"
+    },
 ]
 
+
+# =========================================================
+# INTERNATIONALIZATION
+# =========================================================
+
 LANGUAGE_CODE = "en-us"
+
 TIME_ZONE = "Asia/Kolkata"
+
 USE_I18N = True
 USE_TZ = True
 
+
+# =========================================================
+# STATIC FILES
+# =========================================================
+
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+
+# =========================================================
+# MEDIA / CLOUDINARY
+# =========================================================
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -111,9 +204,18 @@ STORAGES = {
     },
 }
 
+
+# =========================================================
+# DEFAULT PRIMARY KEY
+# =========================================================
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ---------------- REST FRAMEWORK ----------------
+
+# =========================================================
+# REST FRAMEWORK
+# =========================================================
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -123,41 +225,115 @@ REST_FRAMEWORK = {
     ),
 }
 
+
+# =========================================================
+# JWT
+# =========================================================
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-# ---------------- CORS ----------------
-CORS_ALLOWED_ORIGINS = os.getenv(
-    "CORS_ALLOWED_ORIGINS",
-    "http://localhost:5173,http://127.0.0.1:5173"
-).split(",")
+
+# =========================================================
+# CORS
+# =========================================================
+
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ALLOWED_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173"
+    ).split(",")
+    if origin.strip()
+]
+
 CORS_ALLOW_CREDENTIALS = True
 
-# ---------------- EMAIL (Gmail SMTP) ----------------
-# For Gmail: enable 2FA on the Google account, then create an "App Password"
-# at https://myaccount.google.com/apppasswords and put it in .env
+
+# =========================================================
+# EMAIL
+# =========================================================
+
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+
+EMAIL_HOST = os.getenv(
+    "EMAIL_HOST",
+    "smtp.gmail.com"
+)
+
+EMAIL_PORT = int(
+    os.getenv(
+        "EMAIL_PORT",
+        587
+    )
+)
+
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 
-# Admin (shop owner) contact — receives new-order alerts
-ADMIN_NOTIFY_EMAIL = os.getenv("ADMIN_NOTIFY_EMAIL", "")
-ADMIN_NOTIFY_PHONE = os.getenv("ADMIN_NOTIFY_PHONE", "")  # with country code e.g. 919408222280
+EMAIL_HOST_USER = os.getenv(
+    "EMAIL_HOST_USER",
+    ""
+)
 
-# ---------------- SMS (Fast2SMS) ----------------
-FAST2SMS_API_KEY = os.getenv("FAST2SMS_API_KEY", "")
+EMAIL_HOST_PASSWORD = os.getenv(
+    "EMAIL_HOST_PASSWORD",
+    ""
+)
 
-# ---------------- UPI ----------------
-UPI_ID = os.getenv("UPI_ID", "9408222280@ybl")
-UPI_PAYEE_NAME = os.getenv("UPI_PAYEE_NAME", "Shree Krishnaa")
+DEFAULT_FROM_EMAIL = os.getenv(
+    "DEFAULT_FROM_EMAIL",
+    EMAIL_HOST_USER
+)
 
-# If DEBUG, print emails to console too when SMTP creds are missing
+
+# =========================================================
+# ADMIN NOTIFICATIONS
+# =========================================================
+
+ADMIN_NOTIFY_EMAIL = os.getenv(
+    "ADMIN_NOTIFY_EMAIL",
+    ""
+)
+
+ADMIN_NOTIFY_PHONE = os.getenv(
+    "ADMIN_NOTIFY_PHONE",
+    ""
+)
+
+
+# =========================================================
+# SMS - FAST2SMS
+# =========================================================
+
+FAST2SMS_API_KEY = os.getenv(
+    "FAST2SMS_API_KEY",
+    ""
+)
+
+
+# =========================================================
+# UPI
+# =========================================================
+
+UPI_ID = os.getenv(
+    "UPI_ID",
+    "9408222280@ybl"
+)
+
+UPI_PAYEE_NAME = os.getenv(
+    "UPI_PAYEE_NAME",
+    "Shree Krishnaa"
+)
+
+
+# =========================================================
+# DEBUG EMAIL FALLBACK
+# =========================================================
+
 if DEBUG and not EMAIL_HOST_USER:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    EMAIL_BACKEND = (
+        "django.core.mail.backends.console.EmailBackend"
+    )
