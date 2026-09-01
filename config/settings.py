@@ -34,12 +34,11 @@ SECRET_KEY = os.getenv(
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv(
-        "ALLOWED_HOSTS",
-        "localhost,127.0.0.1"
-    ).split(",")
-    if host.strip()
+    "shree-krishna-backend.vercel.app",
+    "shree-krishna-backend-ddc73fb9c-shree-krishna-tailor.vercel.app",
+    "shree-krishna-backend-ny92edlzn-shree-krishna-tailor.vercel.app",
+    "localhost",
+    "127.0.0.1",
 ]
 
 
