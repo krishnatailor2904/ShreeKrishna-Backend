@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-
+from cloudinary.models import CloudinaryField
 from products.models import Product
 
 
@@ -32,7 +32,12 @@ class Order(models.Model):
 
     payment_status = models.CharField(max_length=25, choices=PAYMENT_STATUS, default="pending")
     order_status = models.CharField(max_length=15, choices=ORDER_STATUS, default="pending")
-    payment_screenshot = models.ImageField(upload_to="payment_proofs/", blank=True, null=True)
+    payment_screenshot = CloudinaryField(
+    "payment_screenshot",
+    folder="payment_proofs",
+    blank=True,
+    null=True
+)
     upi_ref_note = models.CharField(max_length=100, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
