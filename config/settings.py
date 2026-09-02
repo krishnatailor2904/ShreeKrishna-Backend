@@ -61,6 +61,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
 
+     "django.contrib.sitemaps",
+
     # Cloudinary
     "cloudinary",
     "cloudinary_storage",
