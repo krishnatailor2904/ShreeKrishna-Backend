@@ -3,12 +3,19 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from products.sitemaps import product_sitemap
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+
     path("api/auth/", include("accounts.urls")),
     path("api/products/", include("products.urls")),
     path("api/orders/", include("orders.urls")),
+
+    path("sitemap.xml", product_sitemap),
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(

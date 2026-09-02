@@ -1,16 +1,35 @@
-from django.contrib.sitemaps import Sitemap
+from django.http import HttpResponse
 from .models import Product
 
 
-class ProductSitemap(Sitemap):
-    changefreq = "weekly"
-    priority = 0.8
+def product_sitemap(request):
+    products = Product.objects.filter(is_active=True)
 
-    def items(self):
-        return Product.objects.filter(is_active=True)
+    urls = [
+        "https://shreekrishnaa.com/",
+        "https://shreekrishnaa.com/shop",
+        "https://shreekrishnaa.com/about",
+        "https://shreekrishnaa.com/contact",
+    ]
 
-    def lastmod(self, obj):
-        return obj.created_at
+    urls += [
+        f"https://shreekrishnaa.com/product/{product.slug}"
+        for product in products
+    ]
 
-    def location(self, obj):
-        return f"/product/{obj.slug}"
+    xml_urls = "\n".join(
+        f"""    <url>
+        <loc>{url}</loc>
+    </url>"""
+        for url in urls
+    )
+
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{xml_urls}
+</urlset>"""
+
+    return HttpResponse(
+        xml,
+        content_type="application/xml"
+    )
