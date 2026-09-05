@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from .models import Order, OrderItem
 from .utils import (
@@ -183,7 +184,7 @@ class OrderAdmin(admin.ModelAdmin):
                     </div>
                 """
 
-        return format_html(html) if html else "—"
+        return mark_safe(html) if html else "—"
 
     product_preview.short_description = "Product"
 
