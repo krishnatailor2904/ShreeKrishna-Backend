@@ -58,8 +58,16 @@ def reject_payment(modeladmin, request, queryset):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
-        "id", "full_name", "phone", "engraving_summary", "total_amount",
-        "payment_status", "order_status", "screenshot_preview", "created_at",
+          "id",
+    "full_name",
+    "phone",
+    "product_preview",
+    "engraving_summary",
+    "total_amount",
+    "payment_status",
+    "order_status",
+    "screenshot_preview",
+    "created_at",
     ]
     list_filter = ["payment_status", "order_status", "created_at"]
     search_fields = ["full_name", "phone", "id"]
@@ -75,6 +83,49 @@ class OrderAdmin(admin.ModelAdmin):
             )
         return "—"
     screenshot_preview.short_description = "Payment Proof"
+    def product_preview(self, obj):
+    html = []
+
+    for item in obj.items.select_related("product").all():
+        if item.product and item.product.image:
+            html.append(
+                format_html(
+                    '''
+                    <div style="
+                        display:flex;
+                        align-items:center;
+                        gap:10px;
+                        margin-bottom:8px;
+                    ">
+                        <img
+                            src="{}"
+                            style="
+                                width:60px;
+                                height:60px;
+                                object-fit:contain;
+                                border-radius:6px;
+                                border:1px solid #ddd;
+                                background:#fff;
+                            "
+                        />
+                        <span>{}</span>
+                    </div>
+                    ''',
+                    item.product.image.url,
+                    item.product_name,
+                )
+            )
+        else:
+            html.append(
+                format_html(
+                    '<div>{}</div>',
+                    item.product_name,
+                )
+            )
+
+    return format_html("".join(str(x) for x in html)) if html else "—"
+
+product_preview.short_description = "Product"
 
     def engraving_summary(self, obj):
         parts = []
