@@ -58,7 +58,7 @@ def reject_payment(modeladmin, request, queryset):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
-          "id",
+    "id",
     "full_name",
     "phone",
     "product_preview",
@@ -68,7 +68,7 @@ class OrderAdmin(admin.ModelAdmin):
     "order_status",
     "screenshot_preview",
     "created_at",
-    ]
+]
     list_filter = ["payment_status", "order_status", "created_at"]
     search_fields = ["full_name", "phone", "id"]
     inlines = [OrderItemInline]
@@ -86,44 +86,38 @@ class OrderAdmin(admin.ModelAdmin):
     def product_preview(self, obj):
     html = []
 
-    for item in obj.items.select_related("product").all():
-        if item.product and item.product.image:
-            html.append(
-                format_html(
-                    '''
-                    <div style="
-                        display:flex;
-                        align-items:center;
-                        gap:10px;
-                        margin-bottom:8px;
-                    ">
-                        <img
-                            src="{}"
-                            style="
-                                width:60px;
-                                height:60px;
-                                object-fit:contain;
-                                border-radius:6px;
-                                border:1px solid #ddd;
-                                background:#fff;
-                            "
-                        />
-                        <span>{}</span>
-                    </div>
-                    ''',
-                    item.product.image.url,
-                    item.product_name,
-                )
-            )
-        else:
-            html.append(
-                format_html(
-                    '<div>{}</div>',
-                    item.product_name,
-                )
-            )
+    def product_preview(self, obj):
+    items = obj.items.select_related("product").all()
 
-    return format_html("".join(str(x) for x in html)) if html else "—"
+    html = ""
+
+    for item in items:
+        if item.product and item.product.image:
+            html += f"""
+                <div style="
+                    display:flex;
+                    align-items:center;
+                    gap:10px;
+                    margin-bottom:8px;
+                ">
+                    <img
+                        src="{item.product.image.url}"
+                        style="
+                            width:60px;
+                            height:60px;
+                            object-fit:contain;
+                            border:1px solid #ddd;
+                            border-radius:6px;
+                            background:#fff;
+                        "
+                    />
+                    <span>{item.product_name}</span>
+                </div>
+            """
+        else:
+            html += f"<div>{item.product_name}</div>"
+
+    return format_html(html) if html else "—"
 
 product_preview.short_description = "Product"
 
