@@ -394,7 +394,7 @@ FAST2SMS_API_KEY = os.getenv(
 
 UPI_ID = os.getenv(
     "UPI_ID",
-    "9408222280@ybl"
+    "chauhanmhimanshu2005@okicici"
 )
 
 UPI_PAYEE_NAME = os.getenv(
