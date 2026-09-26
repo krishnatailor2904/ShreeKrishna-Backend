@@ -74,3 +74,43 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ProductImage(models.Model):
+    """Extra gallery images for a product (in addition to the main image)."""
+
+    product = models.ForeignKey(
+        Product,
+        related_name="images",
+        on_delete=models.CASCADE
+    )
+    image = CloudinaryField("image", folder="products/gallery")
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return f"Image for {self.product.name}"
+
+
+class ProductVideo(models.Model):
+    """Videos for a product (e.g. demo / unboxing videos)."""
+
+    product = models.ForeignKey(
+        Product,
+        related_name="videos",
+        on_delete=models.CASCADE
+    )
+    video = CloudinaryField(
+        "video",
+        folder="products/videos",
+        resource_type="video"
+    )
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return f"Video for {self.product.name}"

@@ -13,7 +13,7 @@ def category_list(request):
 
 @api_view(["GET"])
 def product_list(request):
-    qs = Product.objects.filter(is_active=True)
+    qs = Product.objects.filter(is_active=True).prefetch_related("images", "videos")
 
     category = request.GET.get("category")
     if category:
@@ -37,7 +37,7 @@ def product_list(request):
 @api_view(["GET"])
 def product_detail(request, slug):
     try:
-        product = Product.objects.get(slug=slug, is_active=True)
+        product = Product.objects.prefetch_related("images", "videos").get(slug=slug, is_active=True)
     except Product.DoesNotExist:
         return Response({"detail": "Product not found."}, status=404)
     return Response(ProductSerializer(product, context={"request": request}).data)
