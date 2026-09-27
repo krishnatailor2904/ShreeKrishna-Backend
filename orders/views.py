@@ -82,6 +82,24 @@ def my_orders_view(request):
     return Response(OrderSerializer(orders, many=True, context={"request": request}).data)
 
 
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def track_order_view(request):
+    """Guest order tracking: match on Order ID + phone number, no login needed."""
+    order_id = request.data.get("order_id")
+    phone = (request.data.get("phone") or "").strip()
+
+    if not order_id or not phone:
+        return Response({"detail": "Order ID and phone number are required."}, status=400)
+
+    try:
+        order = Order.objects.get(pk=order_id, phone=phone)
+    except (Order.DoesNotExist, ValueError):
+        return Response({"detail": "No order found with this Order ID and phone number."}, status=404)
+
+    return Response(OrderSerializer(order, context={"request": request}).data)
+
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def order_detail_view(request, pk):
