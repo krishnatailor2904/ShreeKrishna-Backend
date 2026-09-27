@@ -91,6 +91,7 @@ class OrderAdmin(admin.ModelAdmin):
         "id",
         "full_name",
         "phone",
+        "delivery_address",
         "product_preview",
         "engraving_summary",
         "total_amount",
@@ -110,6 +111,9 @@ class OrderAdmin(admin.ModelAdmin):
         "full_name",
         "phone",
         "id",
+        "address_line",
+        "city",
+        "pincode",
     ]
 
     inlines = [OrderItemInline]
@@ -126,6 +130,17 @@ class OrderAdmin(admin.ModelAdmin):
         "updated_at",
         "screenshot_preview",
     ]
+
+    def delivery_address(self, obj):
+        return format_html(
+            "{}<br>{}, {} - {}",
+            obj.address_line,
+            obj.city,
+            obj.state,
+            obj.pincode,
+        )
+
+    delivery_address.short_description = "Delivery Address"
 
     def screenshot_preview(self, obj):
         if obj.payment_screenshot:

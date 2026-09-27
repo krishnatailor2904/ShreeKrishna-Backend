@@ -93,10 +93,13 @@ def notify_customer_order_confirmed(order):
         f"Total paid: Rs.{order.total_amount}\n\n"
         f"Thank you for shopping with Shree Krishnaa 🙏"
     )
-    try:
-        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [order.user.email], fail_silently=True)
-    except Exception:
-        pass
+    if order.user_id and getattr(order.user, "email", ""):
+        try:
+            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [order.user.email], fail_silently=True)
+        except Exception:
+            pass
+    sms_text = f"Shree Krishnaa: Order #{order.id} confirmed! Total Rs.{order.total_amount}. We'll start preparing it now."
+    send_sms(order.phone, sms_text)
 
 
 def notify_customer_order_shipped(order):
@@ -108,10 +111,11 @@ def notify_customer_order_shipped(order):
         f"Total: Rs.{order.total_amount}\n\n"
         f"Thank you for shopping with Shree Krishnaa 🙏"
     )
-    try:
-        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [order.user.email], fail_silently=True)
-    except Exception:
-        pass
+    if order.user_id and getattr(order.user, "email", ""):
+        try:
+            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [order.user.email], fail_silently=True)
+        except Exception:
+            pass
     sms_text = f"Shree Krishnaa: Your order #{order.id} has been shipped! Thank you for shopping with us."
     send_sms(order.phone, sms_text)
 
@@ -124,7 +128,10 @@ def notify_customer_order_delivered(order):
         f"If anything is wrong with your order, just reply to this email and we'll sort it out.\n\n"
         f"Thank you for shopping with Shree Krishnaa 🙏"
     )
-    try:
-        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [order.user.email], fail_silently=True)
-    except Exception:
-        pass
+    if order.user_id and getattr(order.user, "email", ""):
+        try:
+            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [order.user.email], fail_silently=True)
+        except Exception:
+            pass
+    sms_text = f"Shree Krishnaa: Your order #{order.id} has been delivered. Hope you love it! Thank you for shopping with us."
+    send_sms(order.phone, sms_text)

@@ -24,9 +24,9 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = [
             "id", "full_name", "phone", "address_line", "city", "state", "pincode",
             "total_amount", "payment_status", "order_status", "payment_screenshot",
-            "upi_ref_note", "created_at", "items",
+            "upi_ref_note", "created_at", "items", "guest_token",
         ]
-        read_only_fields = ["total_amount", "payment_status", "order_status", "created_at"]
+        read_only_fields = ["total_amount", "payment_status", "order_status", "created_at", "guest_token"]
 
 
 class CreateOrderSerializer(serializers.Serializer):

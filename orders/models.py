@@ -19,7 +19,17 @@ class Order(models.Model):
         ("cancelled", "Cancelled"),
     )
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="orders", on_delete=models.CASCADE)
+    # Login ab optional hai — guest checkout ke liye user None ho sakta hai.
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="orders",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    # Guest (bina-login) order ko baad me verify karne ke liye secret token —
+    # sirf order create karne ke response me diya jaata hai.
+    guest_token = models.CharField(max_length=40, blank=True, db_index=True)
 
     full_name = models.CharField(max_length=150)
     phone = models.CharField(max_length=15)

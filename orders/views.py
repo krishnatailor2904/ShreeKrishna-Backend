@@ -1,7 +1,9 @@
+import uuid
+
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from products.models import Product
@@ -11,7 +13,7 @@ from .utils import generate_upi_qr_png, notify_admin_new_order
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def create_order_view(request):
     serializer = CreateOrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -20,8 +22,11 @@ def create_order_view(request):
     products = {p.id: p for p in Product.objects.filter(id__in=[i["product_id"] for i in data["items"]])}
     total = sum(products[i["product_id"]].price * i["quantity"] for i in data["items"])
 
+    # Logged-in user ho to uske saath order link hoga, warna guest order ban jaayega.
+    is_guest = not request.user.is_authenticated
     order = Order.objects.create(
-        user=request.user,
+        user=None if is_guest else request.user,
+        guest_token=uuid.uuid4().hex if is_guest else "",
         full_name=data["full_name"],
         phone=data["phone"],
         address_line=data["address_line"],
@@ -51,6 +56,25 @@ def create_order_view(request):
     return Response(OrderSerializer(order, context={"request": request}).data, status=status.HTTP_201_CREATED)
 
 
+def _get_order_for_request(request, pk):
+    """Fetch an order the current request is allowed to touch: the owning
+    logged-in user, or a guest with the matching guest_token."""
+    try:
+        order = Order.objects.get(pk=pk)
+    except Order.DoesNotExist:
+        return None
+
+    if request.user.is_authenticated:
+        if order.user_id == request.user.id:
+            return order
+        return None
+
+    token = request.data.get("guest_token") or request.GET.get("guest_token")
+    if order.guest_token and token == order.guest_token:
+        return order
+    return None
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def my_orders_view(request):
@@ -59,22 +83,20 @@ def my_orders_view(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def order_detail_view(request, pk):
-    try:
-        order = Order.objects.get(pk=pk, user=request.user)
-    except Order.DoesNotExist:
+    order = _get_order_for_request(request, pk)
+    if order is None:
         return Response({"detail": "Not found."}, status=404)
     return Response(OrderSerializer(order, context={"request": request}).data)
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def mark_paid_view(request, pk):
     """Customer confirms they've completed the UPI payment; optionally attaches a screenshot."""
-    try:
-        order = Order.objects.get(pk=pk, user=request.user)
-    except Order.DoesNotExist:
+    order = _get_order_for_request(request, pk)
+    if order is None:
         return Response({"detail": "Not found."}, status=404)
 
     if "payment_screenshot" in request.FILES:
