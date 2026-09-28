@@ -84,20 +84,27 @@ def my_orders_view(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
-def track_order_view(request):
-    """Guest order tracking: match on Order ID + phone number, no login needed."""
-    order_id = request.data.get("order_id")
-    phone = (request.data.get("phone") or "").strip()
+def guest_orders_view(request):
+    """Guest 'My Orders': browser apne orders ki [{id, token}] list bhejta hai,
+    sirf wahi orders wapas aate hain jinka id + token dono match kare."""
+    entries = request.data.get("orders") or []
+    if not isinstance(entries, list):
+        return Response([])
 
-    if not order_id or not phone:
-        return Response({"detail": "Order ID and phone number are required."}, status=400)
+    matched = []
+    for entry in entries[:50]:
+        if not isinstance(entry, dict):
+            continue
+        try:
+            order = Order.objects.get(pk=int(entry.get("id")))
+        except (Order.DoesNotExist, TypeError, ValueError):
+            continue
+        token = entry.get("token")
+        if order.guest_token and token == order.guest_token:
+            matched.append(order)
 
-    try:
-        order = Order.objects.get(pk=order_id, phone=phone)
-    except (Order.DoesNotExist, ValueError):
-        return Response({"detail": "No order found with this Order ID and phone number."}, status=404)
-
-    return Response(OrderSerializer(order, context={"request": request}).data)
+    matched.sort(key=lambda o: o.created_at, reverse=True)
+    return Response(OrderSerializer(matched, many=True, context={"request": request}).data)
 
 
 @api_view(["GET"])
