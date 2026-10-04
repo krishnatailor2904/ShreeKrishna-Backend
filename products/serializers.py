@@ -2,6 +2,16 @@ from rest_framework import serializers
 from .models import Category, Product, ProductImage, ProductVideo
 
 
+def https_url(url):
+    if not url:
+        return None
+
+    if url.startswith("http://"):
+        return "https://" + url[len("http://"):]
+
+    return url
+
+
 class CategorySerializer(serializers.ModelSerializer):
     product_count = serializers.IntegerField(
         source="products.count",
@@ -10,7 +20,12 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ["id", "name", "slug", "product_count"]
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "product_count",
+        ]
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -19,11 +34,16 @@ class ProductImageSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         if not obj.image:
             return None
-        return obj.image.url
+
+        return https_url(obj.image.url)
 
     class Meta:
         model = ProductImage
-        fields = ["id", "image", "order"]
+        fields = [
+            "id",
+            "image",
+            "order",
+        ]
 
 
 class ProductVideoSerializer(serializers.ModelSerializer):
@@ -32,11 +52,16 @@ class ProductVideoSerializer(serializers.ModelSerializer):
     def get_video(self, obj):
         if not obj.video:
             return None
-        return obj.video.url
+
+        return https_url(obj.video.url)
 
     class Meta:
         model = ProductVideo
-        fields = ["id", "video", "order"]
+        fields = [
+            "id",
+            "video",
+            "order",
+        ]
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -44,23 +69,33 @@ class ProductSerializer(serializers.ModelSerializer):
         source="category.name",
         read_only=True
     )
+
     category_slug = serializers.CharField(
         source="category.slug",
         read_only=True
     )
 
     image = serializers.SerializerMethodField()
-    images = ProductImageSerializer(many=True, read_only=True)
-    videos = ProductVideoSerializer(many=True, read_only=True)
+
+    images = ProductImageSerializer(
+        many=True,
+        read_only=True
+    )
+
+    videos = ProductVideoSerializer(
+        many=True,
+        read_only=True
+    )
 
     def get_image(self, obj):
         if not obj.image:
             return None
 
-        return obj.image.url
+        return https_url(obj.image.url)
 
     class Meta:
         model = Product
+
         fields = [
             "id",
             "name",
